@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "65089219254",
+    "project_id": "mushu-cc7b2",
+    "storage_bucket": "mushu-cc7b2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:65089219254:android:8fa43460ba6e143ea41417",
+        "android_client_info": {
+          "package_name": "com.mlucas.mushu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGrzQiQiWuKaCxii6A4FWm1JfW_cDsyow"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
