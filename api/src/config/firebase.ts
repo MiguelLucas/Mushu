@@ -23,5 +23,5 @@ admin.initializeApp({
 })
 
 // Export the admin object as firebaseAdmin
-const firebaseAdmin = admin;
-export default firebaseAdmin;
+const firebaseAdmin = admin
+export default firebaseAdmin
