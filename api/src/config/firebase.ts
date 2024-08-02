@@ -21,3 +21,7 @@ const firebaseConfig = {
 admin.initializeApp({
     credential: admin.credential.cert(JSON.stringify(firebaseConfig)),
 })
+
+// Export the admin object as firebaseAdmin
+const firebaseAdmin = admin;
+export default firebaseAdmin;
