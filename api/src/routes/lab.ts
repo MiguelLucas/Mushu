@@ -2,17 +2,10 @@ import { Request, Response } from 'express'
 import express from 'express'
 import fs from 'fs'
 import path from 'path'
-import admin from 'firebase-admin'
 
 import { authenticateApiKey } from '../middleware/apiKeyMiddleware'
 import { handleJsonPost } from '../controllers'
-import { Config } from '../../config/config'
-
-const serviceAccountPath = path.resolve(__dirname, '../../config/firebase-service-account.json')
-let serviceAccount = require(serviceAccountPath)
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-})
+import firebaseAdmin from '../config/firebase'
 
 const router = express.Router()
 router.use(authenticateApiKey)
@@ -31,7 +24,7 @@ router.get('/trigger', (req: Request, res: Response) => {
     }
 
     // Send the message using the Admin SDK
-    admin
+    firebaseAdmin
         .messaging()
         .send(message)
         .then(response => {

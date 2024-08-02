@@ -1,15 +1,14 @@
 {
-    "name": "expressjs-api",
+    "name": "mushu-api",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
+    "main": "app.js",
     "scripts": {
         "start": "node dist/app.js",
         "dev": "nodemon",
         "format": "prettier --write .",
         "test": "jest",
-
-        "build": "rimraf dist && tsc && cp -r ./config/firebase-service-account.json ./dist/config/firebase-service-account.json ",
+        "build": "rimraf dist && tsc",
         "ts.check": "tsc --project tsconfig.json",
         "add-build": "git add dist"
     },
@@ -22,6 +21,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "dotenv": "^16.4.5",
         "express": "^4.19.2",
         "firebase-admin": "^12.3.0",
         "mochawesome": "^7.1.3",
