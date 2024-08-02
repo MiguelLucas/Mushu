@@ -9,7 +9,7 @@
         "format": "prettier --write .",
         "test": "jest",
 
-        "build": "rimraf dist && tsc",
+        "build": "rimraf dist && tsc && cp -r ./config/firebase-service-account.json ./dist/config/firebase-service-account.json ",
         "ts.check": "tsc --project tsconfig.json",
         "add-build": "git add dist"
     },

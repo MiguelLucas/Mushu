@@ -10,11 +10,13 @@ const port = CONSTANTS.SERVER_PORT
 // Middleware to parse JSON bodies
 app.use(express.json())
 // and to support URL-encoded bodies
-app.use(express.urlencoded())
+app.use(express.urlencoded({ extended: true }))
 
 // Use the consolidated routes
 app.use(mainRouter)
 
-app.listen(port, () => {
-    logger.warn(`Test Evaluator Engine listening at http://localhost:${CONSTANTS.SERVER_PORT}`)
-})
+/*app.listen(port, () => {
+    logger.warn(`Mushu API listening at http://localhost:${CONSTANTS.SERVER_PORT}`)
+})*/
+
+export default app
