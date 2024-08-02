@@ -1,8 +1,8 @@
 import admin from 'firebase-admin'
-import * as dotenv from 'dotenv';
+import * as dotenv from 'dotenv'
 
 // Load environment variables from .env file
-dotenv.config();
+dotenv.config()
 
 const firebaseConfig = {
     type: process.env.FIREBASE_TYPE,
@@ -16,7 +16,7 @@ const firebaseConfig = {
     auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
     client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
     universe_domain: process.env.FIREBASE_UNIVERSE_DOMAIN,
-  };
+}
 
 admin.initializeApp({
     credential: admin.credential.cert(JSON.stringify(firebaseConfig)),
