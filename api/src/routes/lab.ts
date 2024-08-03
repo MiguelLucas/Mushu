@@ -5,8 +5,11 @@ import path from 'path'
 
 import { handleJsonPost } from '../controllers'
 import firebaseAdmin from '../config/firebase'
+import { authenticateApiKey } from '../middleware/apiKeyMiddleware'
 
 const router = express.Router()
+
+router.use(authenticateApiKey)
 
 router.get('/', (req: Request, res: Response) => {
     res.status(200).json({ message: 'Hello from Lab Router!' })
