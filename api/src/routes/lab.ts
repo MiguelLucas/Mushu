@@ -14,12 +14,12 @@ router.get('/', (req: Request, res: Response) => {
 
 router.get('/notify/:id', (req: Request, res: Response) => {
     const { id } = req.params
-    const idNumber: number = Number(id);
+    const idNumber: number = Number(id)
 
     let message
     switch (idNumber) {
         case 1:
-             message = {
+            message = {
                 notification: {
                     title: 'Mushu Alert',
                     body: 'The fish are dying! You monster!',
@@ -27,15 +27,15 @@ router.get('/notify/:id', (req: Request, res: Response) => {
                 topic: 'allUsers',
             }
             break
-            default:
-                message = {
-                    notification: {
-                        title: 'Mushu Alert 2',
-                        body: 'Some other alert can be sent',
-                    },
-                    topic: 'allUsers',
-                }
-                break
+        default:
+            message = {
+                notification: {
+                    title: 'Mushu Alert 2',
+                    body: 'Some other alert can be sent',
+                },
+                topic: 'allUsers',
+            }
+            break
     }
 
     // Send the message using the Admin SDK

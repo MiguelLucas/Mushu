@@ -8,12 +8,10 @@ import { LandingController } from '../controllers/landing'
 const mainRouter = Router()
 const landingController = new LandingController()
 
-//mainRouter.use(authenticateApiKey)
+mainRouter.use(authenticateApiKey)
 
 mainRouter.get(ROUTES.ROOT, (req: Request, res: Response) => {
-    res.sendFile(landingController.renderHomePage());
-    //res.sendFile(path.join(__dirname, '../views/landing.html'));
-
+    res.sendFile(landingController.renderHomePage())
 })
 
 // Use the web routes with the base path /web
