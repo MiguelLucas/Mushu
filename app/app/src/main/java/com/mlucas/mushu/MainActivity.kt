@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         askNotificationPermission()
-        //configureNotifications()
+        configureNotifications()
     }
 
     // Declare the launcher at the top of your Activity/Fragment:
@@ -77,7 +77,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun configureNotifications() {
-
         // Subscribe to topic "allUsers"
         FirebaseMessaging.getInstance().subscribeToTopic("allUsers")
             .addOnCompleteListener { task: Task<Void?> ->
@@ -86,7 +85,6 @@ class MainActivity : AppCompatActivity() {
                     msg = "Subscription to allUsers failed"
                 }
                 Log.d(TAG, msg!!)
-                Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
             }
     }
 
