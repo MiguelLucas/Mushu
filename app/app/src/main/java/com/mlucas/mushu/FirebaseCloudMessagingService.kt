@@ -18,7 +18,7 @@ import com.google.firebase.messaging.RemoteMessage
 
 
 class FirebaseCloudMessagingService : FirebaseMessagingService() {
-    val TAG: String = "FirebaseCloudMessagingService"
+    private val TAG: String = "FirebaseCloudMessagingService"
 
 
     // [START receive_message]

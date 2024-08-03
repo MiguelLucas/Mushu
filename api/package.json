@@ -8,9 +8,13 @@
         "dev": "nodemon",
         "format": "prettier --write .",
         "test": "jest",
-        "build": "rimraf dist && tsc",
         "ts.check": "tsc --project tsconfig.json",
-        "add-build": "git add dist"
+        "add-build": "git add dist",
+        "clean": "rimraf dist",
+        "build:ts": "tsc",
+        "copy:views": "mkdir dist/views && cp -R src/views/* dist/views/",
+        "copy:assets": "mkdir dist/assets && cp -R src/assets/* dist/assets/",
+        "build": "npm run clean && npm run build:ts && npm run copy:views && npm run copy:assets"
     },
     "pre-commit": [
         "ts.check",

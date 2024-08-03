@@ -3,24 +3,42 @@ import express from 'express'
 import fs from 'fs'
 import path from 'path'
 
-import { authenticateApiKey } from '../middleware/apiKeyMiddleware'
 import { handleJsonPost } from '../controllers'
 import firebaseAdmin from '../config/firebase'
+import { authenticateApiKey } from '../middleware/apiKeyMiddleware'
 
 const router = express.Router()
+
 router.use(authenticateApiKey)
 
 router.get('/', (req: Request, res: Response) => {
     res.status(200).json({ message: 'Hello from Lab Router!' })
 })
 
-router.get('/trigger', (req: Request, res: Response) => {
-    const message = {
-        notification: {
-            title: 'coiso',
-            body: 'The fish are dying! You monster!',
-        },
-        topic: 'allUsers',
+router.get('/notify/:id', (req: Request, res: Response) => {
+    const { id } = req.params
+    const idNumber: number = Number(id)
+
+    let message
+    switch (idNumber) {
+        case 1:
+            message = {
+                notification: {
+                    title: 'Mushu Alert',
+                    body: 'The fish are dying! You monster!',
+                },
+                topic: 'allUsers',
+            }
+            break
+        default:
+            message = {
+                notification: {
+                    title: 'Mushu Alert 2',
+                    body: 'Some other alert can be sent',
+                },
+                topic: 'allUsers',
+            }
+            break
     }
 
     // Send the message using the Admin SDK

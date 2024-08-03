@@ -6,10 +6,10 @@ export const CONSTANTS = {
         ERROR_FILE: 'logs/error.log',
     },
 
-    ROUTE_PREFIX: '/api/v1',
+    API_PREFIX: '/api/v1',
 }
 
 export const ROUTES = {
-    ROOT: CONSTANTS.ROUTE_PREFIX + '/',
-    LAB: CONSTANTS.ROUTE_PREFIX + '/lab',
+    ROOT: '/',
+    LAB: CONSTANTS.API_PREFIX + '/lab',
 }
