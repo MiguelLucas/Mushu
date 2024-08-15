@@ -7,18 +7,24 @@ import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
 import android.os.Build
+import android.os.Bundle
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
 
 class FirebaseCloudMessagingService : FirebaseMessagingService() {
     private val TAG: String = "FirebaseCloudMessagingService"
+    private var firebaseAnalytics: FirebaseAnalytics = Firebase.analytics
+
 
 
     // [START receive_message]
@@ -42,6 +48,11 @@ class FirebaseCloudMessagingService : FirebaseMessagingService() {
 
         // Check if message contains a notification payload.
         if (remoteMessage.notification != null) {
+            firebaseAnalytics.logEvent("Notification", Bundle().apply {
+                putBoolean("receivedNotification", true)
+                putString("receivedNotificationMsg", remoteMessage.notification!!.body)
+            })
+
             Log.d(TAG, "Message Notification Body: " + remoteMessage.notification!!.body)
             remoteMessage.notification!!.body?.let { sendNotification(it) }
         }
