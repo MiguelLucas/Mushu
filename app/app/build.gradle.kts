@@ -1,7 +1,12 @@
+val appVersion: String by rootProject.extra
+val roomVersion: String by rootProject.extra
+
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.gms.google-services")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -13,7 +18,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "0.0.2"
+        versionName = appVersion
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -68,5 +73,12 @@ dependencies {
     // This is recommended, but not required.
     // See: https://firebase.google.com/docs/cloud-messaging/manage-tokens
     implementation(libs.firebase.firestore)
+
+    // Import the Room library
+    implementation(libs.androidx.room.runtime)
+    annotationProcessor("androidx.room:room-compiler:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
+    implementation(libs.androidx.room.ktx) // Add Room Kotlin extensions
+    implementation(libs.kotlinx.coroutines.android) // Add Coroutines
 
 }
