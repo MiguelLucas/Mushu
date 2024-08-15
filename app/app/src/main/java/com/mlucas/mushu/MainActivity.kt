@@ -15,6 +15,9 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.gms.tasks.Task
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.mlucas.mushu.databinding.ActivityMainBinding
 
@@ -22,6 +25,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val TAG = "MLUCAS"
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +34,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val navView: BottomNavigationView = binding.navView
+        firebaseAnalytics = Firebase.analytics
 
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         // Passing each menu ID as a set of Ids because each
@@ -52,8 +57,14 @@ class MainActivity : AppCompatActivity() {
     ) { isGranted: Boolean ->
         if (isGranted) {
             // FCM SDK (and your app) can post notifications.
+            firebaseAnalytics.logEvent("Notification", Bundle().apply {
+                putBoolean("notificationPermissionGranted", true)
+            })
         } else {
             // TODO: Inform user that that your app will not show notifications.
+            firebaseAnalytics.logEvent("Notification", Bundle().apply {
+                putBoolean("notificationPermissionGranted", false)
+            })
         }
     }
 
@@ -63,14 +74,24 @@ class MainActivity : AppCompatActivity() {
             if (ContextCompat.checkSelfPermission(this, POST_NOTIFICATIONS) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
+                Log.d("MLUCAS", "Notification permission already granted")
+                firebaseAnalytics.logEvent("Notification", Bundle().apply {
+                    putBoolean("notificationPermission", true)
+                })
                 // FCM SDK (and your app) can post notifications.
             } else if (shouldShowRequestPermissionRationale(POST_NOTIFICATIONS)) {
                 // TODO: display an educational UI explaining to the user the features that will be enabled
                 //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
                 //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
                 //       If the user selects "No thanks," allow the user to continue without notifications.
+                firebaseAnalytics.logEvent("Notification", Bundle().apply {
+                    putBoolean("notificationPermissionSpecial", true)
+                })
             } else {
                 // Directly ask for the permission
+                firebaseAnalytics.logEvent("Notification", Bundle().apply {
+                    putBoolean("askingNotificationPermission", true)
+                })
                 requestPermissionLauncher.launch(POST_NOTIFICATIONS)
             }
         }
@@ -84,7 +105,11 @@ class MainActivity : AppCompatActivity() {
                 if (!task.isSuccessful) {
                     msg = "Subscription to allUsers failed"
                 }
-                Log.d(TAG, msg!!)
+                Log.d(TAG, msg)
+                firebaseAnalytics.logEvent("topicSubscription", Bundle().apply {
+                    putBoolean("allUsersSubscription", task.isSuccessful)
+                    putString("allUsersSubscriptionMsg", msg)
+                })
             }
     }
 
