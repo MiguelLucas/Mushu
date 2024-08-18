@@ -7,4 +7,4 @@ plugins {
 }
 
 val appVersion by extra { "0.0.3" }
-val roomVersion by extra { "2.4.0" }
+val roomVersion by extra { "2.6.1" }

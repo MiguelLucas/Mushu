@@ -1,5 +1,6 @@
 package com.mlucas.mushu.data.database
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -13,10 +14,13 @@ interface NotificationDao {
     suspend fun insert(notification: NotificationEntity)
 
     @Query("SELECT * FROM notifications ORDER BY timestamp DESC LIMIT 5")
-    suspend fun getLast5Notifications(): List<NotificationEntity>
+    suspend fun getLastNotifications(): List<NotificationEntity>
 
     @Query("DELETE FROM notifications WHERE id IN (SELECT id FROM notifications ORDER BY timestamp ASC LIMIT 1)")
     suspend fun deleteOldestNotification()
+
+    @Query("DELETE FROM notifications WHERE id NOT IN (SELECT id FROM notifications ORDER BY timestamp DESC LIMIT 5)")
+    suspend fun removeExcessNotifications()
 
     @Query("DELETE FROM notifications")
     suspend fun deleteAllNotifications()
