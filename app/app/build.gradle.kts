@@ -13,6 +13,10 @@ android {
     namespace = "com.mlucas.mushu"
     compileSdk = 34
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.mlucas.mushu"
         minSdk = 24
@@ -24,7 +28,13 @@ android {
     }
 
     buildTypes {
+
+        debug {
+            buildConfigField("Boolean", "SUBSCRIBE_DEBUG_NOTIFICATIONS", "true")
+        }
         release {
+            buildConfigField("Boolean", "SUBSCRIBE_DEBUG_NOTIFICATIONS", "false")
+
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -55,9 +65,11 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.recyclerview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
 
     // Import the Firebase BoM
     implementation(platform(libs.firebase.bom))
@@ -78,7 +90,11 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
-    implementation(libs.androidx.room.ktx) // Add Room Kotlin extensions
+    implementation(libs.androidx.room.ktx)
     implementation(libs.kotlinx.coroutines.android) // Add Coroutines
+
+    // Import third-party RecyclerView Animators
+    implementation(libs.recyclerview.animators)
+
 
 }
