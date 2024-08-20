@@ -21,6 +21,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.mlucas.mushu.databinding.ActivityMainBinding
 
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -111,6 +112,21 @@ class MainActivity : AppCompatActivity() {
                     putString("allUsersSubscriptionMsg", msg)
                 })
             }
+
+        if (BuildConfig.SUBSCRIBE_DEBUG_NOTIFICATIONS) {
+            FirebaseMessaging.getInstance().subscribeToTopic("debug")
+                .addOnCompleteListener { task: Task<Void?> ->
+                    var msg = "Subscribed to debug"
+                    if (!task.isSuccessful) {
+                        msg = "Subscription to debug failed"
+                    }
+                    Log.d(TAG, msg)
+                    firebaseAnalytics.logEvent("topicSubscription", Bundle().apply {
+                        putBoolean("debugSubscription", task.isSuccessful)
+                        putString("debugSubscriptionMsg", msg)
+                    })
+                }
+        }
     }
 
 
