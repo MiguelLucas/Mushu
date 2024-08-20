@@ -14,7 +14,7 @@ interface NotificationDao {
     suspend fun insert(notification: NotificationEntity)
 
     @Query("SELECT * FROM notifications ORDER BY timestamp DESC LIMIT 5")
-    suspend fun getLastNotifications(): List<NotificationEntity>
+    fun getLastNotifications(): LiveData<List<NotificationEntity>>
 
     @Query("DELETE FROM notifications WHERE id IN (SELECT id FROM notifications ORDER BY timestamp ASC LIMIT 1)")
     suspend fun deleteOldestNotification()

@@ -10,8 +10,12 @@ import com.mlucas.mushu.data.entities.NotificationEntity
 
 class NotificationsViewModel(private val notificationDao: NotificationDao) : ViewModel() {
 
-    private val _notifications = MutableLiveData<List<NotificationEntity>>()
-    val notifications: LiveData<List<NotificationEntity>> get() = _notifications
+    private val _notifications = notificationDao.getLastNotifications()
+    val notifications: LiveData<List<NotificationEntity>>
+    get() {
+        //getLastNotifications()
+        return _notifications
+    }
 
     private val _text = MutableLiveData<String>().apply {
         value = "This is notifications Fragment"
@@ -21,11 +25,11 @@ class NotificationsViewModel(private val notificationDao: NotificationDao) : Vie
     fun insert(notification: NotificationEntity) = viewModelScope.launch {
         notificationDao.insert(notification)
         notificationDao.removeExcessNotifications()
-        getLastNotifications()
+        //getLastNotifications()
     }
 
-    fun getLastNotifications() = viewModelScope.launch {
-        _notifications.value = notificationDao.getLastNotifications()
+    private fun getLastNotifications() = viewModelScope.launch {
+        //_notifications.value = notificationDao.getLastNotifications()
     }
 
     fun deleteAllNotifications() = viewModelScope.launch {
