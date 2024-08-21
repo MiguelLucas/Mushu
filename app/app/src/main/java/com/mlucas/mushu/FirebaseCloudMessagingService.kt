@@ -19,6 +19,11 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.mlucas.mushu.data.database.NotificationDatabase
+import com.mlucas.mushu.data.entities.NotificationEntity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class FirebaseCloudMessagingService : FirebaseMessagingService() {
@@ -53,12 +58,26 @@ class FirebaseCloudMessagingService : FirebaseMessagingService() {
                 putString("receivedNotificationMsg", remoteMessage.notification!!.body)
             })
 
+            addNotificationToDatabase(remoteMessage.notification!!)
+
             Log.d(TAG, "Message Notification Body: " + remoteMessage.notification!!.body)
             remoteMessage.notification!!.body?.let { sendNotification(it) }
         }
 
         // Also if you intend on generating your own notifications as a result of a received FCM
         // message, here is where that should be initiated. See sendNotification method below.
+    }
+
+    private fun addNotificationToDatabase(message: RemoteMessage.Notification) {
+        val notification = NotificationEntity(title = message.title!!, message = message.body!!, timestamp = System.currentTimeMillis())
+
+        // Using a coroutine to insert into the database
+        CoroutineScope(Dispatchers.IO).launch {
+            val database = NotificationDatabase.getDatabase(applicationContext)
+            val notificationDao = database.notificationDao()
+            notificationDao.insert(notification)
+            Log.d(TAG, "Inserting notification " + notification.title)
+        }
     }
 
 

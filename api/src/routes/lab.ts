@@ -21,6 +21,15 @@ router.get('/notify/:id', (req: Request, res: Response) => {
 
     let message
     switch (idNumber) {
+        case 0:
+            message = {
+                notification: {
+                    title: 'Mushu Debug Alert',
+                    body: 'The fish are dying...maybe? ',
+                },
+                topic: 'debug',
+            }
+            break
         case 1:
             message = {
                 notification: {
