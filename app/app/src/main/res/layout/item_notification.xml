@@ -46,7 +46,7 @@
         android:layout_below="@+id/notificationDate"
         android:layout_marginStart="20dp"
         android:layout_marginTop="7dp"
-        app:srcCompat="@drawable/icon_calendar"
+        app:srcCompat="@drawable/icon_notification"
         app:tint="#808080" />
 
     <TextView
