@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mlucas.mushu.R
 import com.mlucas.mushu.data.database.NotificationDatabase
 import com.mlucas.mushu.data.entities.NotificationEntity
+import com.mlucas.mushu.data.entities.NotificationType
 import com.mlucas.mushu.databinding.FragmentNotificationsBinding
 import jp.wasabeef.recyclerview.animators.LandingAnimator
 import java.util.Calendar
@@ -97,6 +99,7 @@ class NotificationsFragment : Fragment() {
             val title: TextView = view.findViewById(R.id.notificationTitle)
             val message: TextView = view.findViewById(R.id.notificationMessage)
             val date: TextView = view.findViewById(R.id.notificationDate)
+            val icon: ImageView = view.findViewById(R.id.notificationMessageImg)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NotificationViewHolder {
@@ -109,6 +112,9 @@ class NotificationsFragment : Fragment() {
             val notification = notifications[position]
             holder.title.text = notification.title
             holder.message.text = notification.message
+            if (notification.type == NotificationType.ALARM) {
+                holder.icon.setImageResource(android.R.drawable.ic_dialog_alert)
+            }
 
             val calendar: Calendar = Calendar.getInstance()
             calendar.timeInMillis = notification.timestamp
