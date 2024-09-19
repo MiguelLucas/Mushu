@@ -21,56 +21,51 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.mlucas.mushu.data.database.NotificationDatabase
 import com.mlucas.mushu.data.entities.NotificationEntity
+import com.mlucas.mushu.data.entities.NotificationType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
 class FirebaseCloudMessagingService : FirebaseMessagingService() {
-    private val TAG: String = "FirebaseCloudMessagingService"
+    private val TAG: String = "[Mushu][FirebaseCloudMessagingService]"
     private var firebaseAnalytics: FirebaseAnalytics = Firebase.analytics
-
-
 
     // [START receive_message]
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        // TODO(developer): Handle FCM messages here.
-        // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
         Log.d(TAG, "From: " + remoteMessage.from)
+
+        // Check if message contains a notification payload.
+        firebaseAnalytics.logEvent("Notification", Bundle().apply {
+            putBoolean("receivedNotification", true)
+            putString("receivedNotificationMsg", remoteMessage.data["body"])
+        })
+
+        val notificationType = NotificationType.fromString(remoteMessage.data["type"])
+        val notification = NotificationEntity(title = remoteMessage.data["title"]!!, message = remoteMessage.data["body"]!!, timestamp = System.currentTimeMillis(), type = notificationType)
+        this.addNotificationToDatabase(notification)
+        Log.d(TAG, "Message Notification Body: " + remoteMessage.data["body"]!!)
 
         // Check if message contains a data payload.
         if (remoteMessage.data.isNotEmpty()) {
             Log.d(TAG, "Message data payload: " + remoteMessage.data)
 
-            if ( /* Check if data needs to be processed by long running job */true) {
-                // For long-running tasks (10 seconds or more) use WorkManager.
-                scheduleJob()
+            // Check if data needs to be processed by long running job
+            // For long-running tasks (10 seconds or more) use WorkManager (see scheduleJob())
+            // For short lived tasks, execute them immediately
+
+            if (notificationType == NotificationType.ALARM) {
+                sendAlarm(notification)
             } else {
-                // Handle message within 10 seconds
-                handleNow()
+                sendNotification(notification)
             }
+        } else {
+            //TODO: Throw error here
+            //sendNotification(notification)
         }
-
-        // Check if message contains a notification payload.
-        if (remoteMessage.notification != null) {
-            firebaseAnalytics.logEvent("Notification", Bundle().apply {
-                putBoolean("receivedNotification", true)
-                putString("receivedNotificationMsg", remoteMessage.notification!!.body)
-            })
-
-            addNotificationToDatabase(remoteMessage.notification!!)
-
-            Log.d(TAG, "Message Notification Body: " + remoteMessage.notification!!.body)
-            remoteMessage.notification!!.body?.let { sendNotification(it) }
-        }
-
-        // Also if you intend on generating your own notifications as a result of a received FCM
-        // message, here is where that should be initiated. See sendNotification method below.
     }
 
-    private fun addNotificationToDatabase(message: RemoteMessage.Notification) {
-        val notification = NotificationEntity(title = message.title!!, message = message.body!!, timestamp = System.currentTimeMillis())
-
+    private fun addNotificationToDatabase(notification: NotificationEntity) {
         // Using a coroutine to insert into the database
         CoroutineScope(Dispatchers.IO).launch {
             val database = NotificationDatabase.getDatabase(applicationContext)
@@ -119,7 +114,7 @@ class FirebaseCloudMessagingService : FirebaseMessagingService() {
         // TODO: Implement this method to send token to your app server.
     }
 
-    private fun sendNotification(messageBody: String) {
+    private fun sendNotification(notification: NotificationEntity) {
         val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent = PendingIntent.getActivity(
@@ -132,8 +127,8 @@ class FirebaseCloudMessagingService : FirebaseMessagingService() {
         val notificationBuilder: NotificationCompat.Builder =
             NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("Mushu Alert")
-                .setContentText(messageBody)
+                .setContentTitle(notification.title)
+                .setContentText(notification.message)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent)
@@ -152,6 +147,15 @@ class FirebaseCloudMessagingService : FirebaseMessagingService() {
         }
 
         notificationManager.notify(0,  /* ID of notification */notificationBuilder.build())
+    }
+
+    private fun sendAlarm(notification: NotificationEntity) {
+        val intent = Intent(this, AlarmService::class.java).apply {
+            action = "START_ALARM"
+            putExtra("title", notification.title)
+            putExtra("message", notification.message)
+        }
+        startForegroundService(intent)
     }
 
     class MyWorker(context: Context, workerParams: WorkerParameters) :
