@@ -1,4 +1,5 @@
-export enum EXAMPLE_ENUM {
-    DUMMY1 = 'PARAM1',
-    DUMMY2 = 'PARAM2',
+export enum NOTIFICATION_TYPE {
+    ALERT = "Alert",
+    WARNING = "Warning",
+    NOTIFIER = "Notifier",
 }
