@@ -4,6 +4,7 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
 
-    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
+    <string name="default_notification_channel_id" translatable="false">general_notification_channel</string>
+    <string name="alarm_notification_channel_id" translatable="false">alarm_notification_channel</string>
 
 </resources>
