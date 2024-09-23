@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.gms.google-services")
     id("com.google.devtools.ksp")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -66,6 +67,8 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.preference.ktx)
+    implementation(libs.androidx.preference)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -80,6 +83,7 @@ dependencies {
     // For an optimal experience using FCM, add the Firebase SDK
     // for Google Analytics. This is recommended, but not required.
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
 
     // Used to store FCM Registration Token.
     // This is recommended, but not required.
