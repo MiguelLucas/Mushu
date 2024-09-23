@@ -1,6 +1,7 @@
 package com.mlucas.mushu
 
 import android.app.Notification
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
@@ -9,6 +10,7 @@ import android.content.Intent
 import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.net.Uri
+import android.os.Build
 import android.os.CountDownTimer
 import android.os.IBinder
 import android.util.Log
@@ -22,7 +24,6 @@ class AlarmService : Service() {
     private lateinit var ringtone: Uri
 
     private val timeToStopAlarm: Long = 60
-    private val alarmChannelId: String = "alarm_service_channel"
     private var TAG: String = "[Mushu][AlarmService]"
 
 
@@ -84,6 +85,7 @@ class AlarmService : Service() {
     private fun createNotification(title: String, message: String): Notification {
         Log.d(TAG, "Creating alarm service notification")
 
+        val channelId: String = R.string.alarm_notification_channel_id.toString()
         val stopIntent = Intent(this, AlarmService::class.java).apply {
             action = "STOP_ALARM"
         }
@@ -91,7 +93,15 @@ class AlarmService : Service() {
             this, 0, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        return NotificationCompat.Builder(this, alarmChannelId)
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val channel = NotificationChannel(
+            channelId,
+            "Alarm notification channel",
+            NotificationManager.IMPORTANCE_HIGH
+        )
+        notificationManager.createNotificationChannel(channel)
+
+        val notificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(android.R.drawable.ic_dialog_alert)
             .setContentTitle(title)
             .setContentText(message)
@@ -100,6 +110,7 @@ class AlarmService : Service() {
             .addAction(android.R.drawable.ic_dialog_alert, "Stop", stopPendingIntent)
             .setAutoCancel(true)
             .setDeleteIntent(stopPendingIntent)
-            .build()
+
+        return notificationBuilder.build()
     }
 }
