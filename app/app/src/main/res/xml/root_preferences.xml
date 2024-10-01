@@ -1,11 +1,41 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="@string/messages_header">
+    <PreferenceCategory app:title="@string/preferences_header_general">
 
         <EditTextPreference
-            app:key="signature"
-            app:title="@string/signature_title"
+            app:key="notifications_max_number"
+            app:title="@string/notification_max_number"
+            app:defaultValue="5"
             app:useSimpleSummaryProvider="true" />
+
+        <MultiSelectListPreference
+            app:key="notification_channels"
+            app:title="@string/notification_channels"
+            app:entries="@array/notification_channel_entries"
+            app:entryValues="@array/notification_channel_values"
+            app:defaultValue="@array/notification_channel_default_values" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/preferences_header_alarm">
+
+        <SwitchPreferenceCompat
+            app:key="alarm_enabled"
+            app:title="@string/alarm_enable"
+            app:defaultValue="true"/>
+
+        <EditTextPreference
+            app:dependency="alarm_enabled"
+            app:key="alarm_max_time_to_play"
+            app:title="@string/alarm_max_time_to_play"
+            app:defaultValue="60"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="Experimental"
+        app:isPreferenceVisible="false">
 
         <ListPreference
             app:defaultValue="reply"
@@ -19,24 +49,9 @@
             app:key="multi_select_key"
             app:title="Multi-Select Option"
             app:summary="Select multiple options"
-            app:entries="@array/option_entries"
-            app:entryValues="@array/option_values"
-            app:defaultValue="@array/default_values" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory app:title="@string/sync_header">
-
-        <SwitchPreferenceCompat
-            app:key="sync"
-            app:title="@string/sync_title" />
-
-        <SwitchPreferenceCompat
-            app:dependency="sync"
-            app:key="attachment"
-            app:summaryOff="@string/attachment_summary_off"
-            app:summaryOn="@string/attachment_summary_on"
-            app:title="@string/attachment_title" />
+            app:entries="@array/notification_channel_entries"
+            app:entryValues="@array/notification_channel_values"
+            app:defaultValue="@array/notification_channel_default_values" />
 
     </PreferenceCategory>
 

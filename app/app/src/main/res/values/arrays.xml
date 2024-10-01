@@ -10,22 +10,20 @@
         <item>reply_all</item>
     </string-array>
 
-    <string-array name="option_entries">
-        <item>Option 1</item>
-        <item>Option 2</item>
-        <item>Option 3</item>
-        <item>Option 4</item>
+    <string-array name="notification_channel_entries">
+        <item>All users</item>
+        <item>No alarm</item>
+        <item>Debug</item>
+
     </string-array>
 
-    <string-array name="option_values">
-        <item>option1</item>
-        <item>option2</item>
-        <item>option3</item>
-        <item>option4</item>
+    <string-array name="notification_channel_values">
+        <item>all_users</item>
+        <item>no_alarm</item>
+        <item>debug</item>
     </string-array>
 
-    <string-array name="default_values">
-        <item>option1</item>
-        <item>option3</item>
+    <string-array name="notification_channel_default_values">
+        <item>all_users</item>
     </string-array>
 </resources>
