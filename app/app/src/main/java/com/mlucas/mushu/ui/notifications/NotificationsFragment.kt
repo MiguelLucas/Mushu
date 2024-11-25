@@ -1,8 +1,8 @@
 package com.mlucas.mushu.ui.notifications
 
+import android.content.Context
 import android.os.Bundle
 import android.text.format.DateFormat
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,9 +11,11 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mlucas.mushu.R
+import com.mlucas.mushu.SettingsActivity
 import com.mlucas.mushu.data.database.NotificationDatabase
 import com.mlucas.mushu.data.entities.NotificationEntity
 import com.mlucas.mushu.data.entities.NotificationType
@@ -47,7 +49,7 @@ class NotificationsFragment : Fragment() {
         //viewModel.deleteAllNotifications()
 
         // Create notification adapter with an empty list
-        val notificationsAdapter = NotificationsAdapter(ArrayList<NotificationEntity>())
+        val notificationsAdapter = this.context?.let { NotificationsAdapter(it, ArrayList<NotificationEntity>()) }
         // Observe changes to the notification list and order the adapter to update
         viewModel.notifications.observe(viewLifecycleOwner, Observer { notifications ->
 
@@ -64,14 +66,14 @@ class NotificationsFragment : Fragment() {
 
                 sortedNewNotifications.forEach { notification ->
                     println(notification)
-                    notificationsAdapter.addNotification(notification)
+                    notificationsAdapter?.addNotification(notification)
                 }
 
                 previousNotifications = it
             }
 
             // Remove notifications that pass the limit
-            notificationsAdapter.removeExcessNotifications()
+            notificationsAdapter?.removeExcessNotifications()
         })
 
         // Create the recycler view with the adapter above
@@ -81,7 +83,10 @@ class NotificationsFragment : Fragment() {
         recyclerView.adapter = notificationsAdapter
 
         // Example usage:
-        //viewModel.insert(NotificationEntity(title = "Title1", message = "Message body 1"))
+
+        /*for (i in 1..15) {
+            viewModel.insert(NotificationEntity(title = "Title $i", message = "Message body $i", type = NotificationType.NOTIFIER))
+        }*/
         //viewModel.insert(NotificationEntity(title = "Title2", message = "Message body 2"))
 
         return root
@@ -92,7 +97,7 @@ class NotificationsFragment : Fragment() {
         _binding = null
     }
 
-    class NotificationsAdapter(private var notifications: MutableList<NotificationEntity>) :
+    class NotificationsAdapter(private val context: Context, private var notifications: MutableList<NotificationEntity>) :
         RecyclerView.Adapter<NotificationsAdapter.NotificationViewHolder>() {
 
         class NotificationViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -132,12 +137,14 @@ class NotificationsFragment : Fragment() {
         }
 
         fun removeExcessNotifications() {
-            //TODO: Get this value from a setting
-            val index = 4
-            if (this.notifications.size > 5) {
+            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+            val notificationsMaxNumber: Int =
+                sharedPreferences.getString(SettingsActivity.NOTIFICATIONS_MAX_NUMBER, "0")?.toInt()!!
+
+            if (this.notifications.size > notificationsMaxNumber) {
                 val previousSize = this.notifications.size
-                this.notifications.subList(index + 1, this.notifications.size).clear()
-                notifyItemRangeRemoved(5, previousSize - 5)
+                this.notifications.subList(notificationsMaxNumber, this.notifications.size).clear()
+                notifyItemRangeRemoved(notificationsMaxNumber, previousSize - notificationsMaxNumber)
             }
         }
     }

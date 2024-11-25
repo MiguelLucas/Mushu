@@ -23,8 +23,10 @@ class AlarmService : Service() {
     private lateinit var timer: CountDownTimer
     private lateinit var ringtone: Uri
 
-    private val timeToStopAlarm: Long = 60
-    private var TAG: String = "[Mushu][AlarmService]"
+
+    private var timeToStopAlarm: Long = 60
+    private var alarmEnabled: Boolean = true
+    private val TAG: String = "[Mushu][AlarmService]"
 
 
     override fun onCreate() {
@@ -34,6 +36,8 @@ class AlarmService : Service() {
         mediaPlayer = MediaPlayer.create(this, ringtone)
         mediaPlayer.isLooping = true
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        alarmEnabled = getSharedPreferences(SettingsActivity.NAME, MODE_PRIVATE).getBoolean(SettingsActivity.ALARM_ENABLED, true)
+        timeToStopAlarm = getSharedPreferences(SettingsActivity.NAME, MODE_PRIVATE).getLong(SettingsActivity.ALARM_MAX_TIME_TO_PLAY,0)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -54,6 +58,11 @@ class AlarmService : Service() {
     }
 
     private fun startAlarm(intent: Intent) {
+        if (!alarmEnabled) {
+            Log.d(TAG, "Alarm service is not enabled!")
+            return
+        }
+
         val title = intent.getStringExtra("title") ?: "Alarm title"
         val message = intent.getStringExtra("message") ?: "Alarm triggered"
 
@@ -62,6 +71,7 @@ class AlarmService : Service() {
         mediaPlayer.start()
 
         Log.d(TAG, "Starting alarm service")
+
         // Start a timer to automatically stop the alarm after 10 seconds
         timer = object : CountDownTimer(timeToStopAlarm * 1000, 1000) {
             override fun onTick(millisUntilFinished: Long) {}
@@ -73,6 +83,11 @@ class AlarmService : Service() {
     }
 
     private fun stopAlarm() {
+        if (!alarmEnabled) {
+            Log.d(TAG, "Alarm service is not enabled!")
+            return
+        }
+        
         Log.d(TAG, "Stopping alarm service")
 
         mediaPlayer.stop()

@@ -1,0 +1,61 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory app:title="@string/preferences_header_general">
+
+        <EditTextPreference
+            app:key="notifications_max_number"
+            app:title="@string/notification_max_number"
+            app:defaultValue="5"
+            android:inputType="number"
+            android:digits="0123456789"
+            app:useSimpleSummaryProvider="true" />
+
+        <!--MultiSelectListPreference
+            app:key="notification_channels"
+            app:title="@string/notification_channels"
+            app:entries="@array/notification_channel_entries"
+            app:entryValues="@array/notification_channel_values"
+            app:defaultValue="@array/notification_channel_default_values" /> -->
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/preferences_header_alarm">
+
+        <SwitchPreferenceCompat
+            app:key="alarm_enabled"
+            app:title="@string/alarm_enable"
+            app:defaultValue="true"/>
+
+        <EditTextPreference
+            app:dependency="alarm_enabled"
+            app:key="alarm_max_time_to_play"
+            app:title="@string/alarm_max_time_to_play"
+            app:defaultValue="60"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="Experimental"
+        app:isPreferenceVisible="false">
+
+        <ListPreference
+            app:defaultValue="reply"
+            app:entries="@array/reply_entries"
+            app:entryValues="@array/reply_values"
+            app:key="reply"
+            app:title="@string/reply_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <MultiSelectListPreference
+            app:key="multi_select_key"
+            app:title="Multi-Select Option"
+            app:summary="Select multiple options"
+            app:entries="@array/notification_channel_entries"
+            app:entryValues="@array/notification_channel_values"
+            app:defaultValue="@array/notification_channel_default_values" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
