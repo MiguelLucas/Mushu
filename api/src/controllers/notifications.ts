@@ -1,0 +1,47 @@
+import { Request, Response } from 'express'
+import asyncHandler from 'express-async-handler'
+import { isEmpty } from 'lodash';
+
+import { NOTIFICATION_TYPE } from '../utils/enums'
+import { sendFirebaseMessage } from '../services/firebase'
+import { FirebaseMessageResult, FirebaseMessage } from '../types/firebase'
+
+const TAG = '[NotificationsController]'
+
+export const handleNotify = asyncHandler(async (req: Request, res: Response) => {
+    console.log(`${TAG} Handling notification request`)
+    const reqBody = req.body
+
+    if (isEmpty(reqBody)) {
+        console.error(`${TAG} Request body not present/empty`)
+
+        res.status(400).json({
+            message: `No request body!`,
+        })
+        return
+    }
+
+    let message: FirebaseMessage = {
+        data: {
+            title: reqBody.title || 'Mushu Debug Notification',
+            body: reqBody.body || 'Please ignore if you are getting this notification',
+            type: NOTIFICATION_TYPE.NOTIFIER,
+        },
+        topic: 'debug',
+    }
+
+    console.log(`${TAG} Sending notification: ${message.data.title}`)
+    let firebaseRes: FirebaseMessageResult = await sendFirebaseMessage(message)
+
+    if (firebaseRes.success){
+        res.status(204).send()
+    } else {
+        res.status(500).send(firebaseRes.error)
+    }
+})
+
+export const handleAlert = asyncHandler(async (req: Request, res: Response) => {
+    console.log(`${TAG} Handling alert request`)
+
+    res.send('NOT IMPLEMENTED: Handle alert')
+})
