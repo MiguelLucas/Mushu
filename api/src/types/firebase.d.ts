@@ -11,7 +11,6 @@ export interface FirebaseMessage {
         title: string
         body: string
         type: NOTIFICATION_TYPE
-    },
+    }
     topic: string
-
 }

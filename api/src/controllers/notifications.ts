@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import asyncHandler from 'express-async-handler'
-import { isEmpty } from 'lodash';
+import { isEmpty } from 'lodash'
 
 import { NOTIFICATION_TYPE } from '../utils/enums'
 import { sendFirebaseMessage } from '../services/firebase'
@@ -31,21 +31,23 @@ const handleNotificationRequest = async (req: Request, res: Response, type: NOTI
         data: {
             title: reqBody.title || 'Mushu Debug Notification',
             body: reqBody.body || 'Please ignore if you are getting this notification',
-            type: type
+            type: type,
         },
         topic: reqBody.topic || 'debug',
     }
 
-    console.log(`${TAG} Sending ${type}: ${message.data.title}`)
-    let firebaseRes: FirebaseMessageResult = await sendFirebaseMessage(message)
-
-    if (firebaseRes.success){
-        res.status(204).send()
-    } else {
-        res.status(500).send(firebaseRes.error)
+    try {
+        console.log(`${TAG} Sending ${type}: ${message.data.title}`)
+        let firebaseRes: FirebaseMessageResult = await sendFirebaseMessage(message)
+        if (firebaseRes.success) {
+            res.status(204).send()
+        } else {
+            res.status(500).send(firebaseRes.error)
+        }
+    } catch (error) {
+        res.status(500).send('Error using Firebase Cloud Messaging service')
     }
 }
-
 
 export const handleNotify = asyncHandler(async (req: Request, res: Response) => {
     console.log(`${TAG} Handling notification request`)

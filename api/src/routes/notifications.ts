@@ -81,7 +81,6 @@ router.get('/alert/:id', (req: Request, res: Response) => {
         })
 })
 
-
 router.post(NOTIFICATIONS_ROUTES.NOTIFY, NotificationsController.handleNotify)
 
 router.post(NOTIFICATIONS_ROUTES.ALERT, NotificationsController.handleAlert)
