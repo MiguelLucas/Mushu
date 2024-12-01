@@ -15,6 +15,7 @@ import android.os.CountDownTimer
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.preference.PreferenceManager
 
 class AlarmService : Service() {
 
@@ -36,8 +37,11 @@ class AlarmService : Service() {
         mediaPlayer = MediaPlayer.create(this, ringtone)
         mediaPlayer.isLooping = true
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        alarmEnabled = getSharedPreferences(SettingsActivity.NAME, MODE_PRIVATE).getBoolean(SettingsActivity.ALARM_ENABLED, true)
-        timeToStopAlarm = getSharedPreferences(SettingsActivity.NAME, MODE_PRIVATE).getLong(SettingsActivity.ALARM_MAX_TIME_TO_PLAY,0)
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        alarmEnabled = sharedPreferences.getBoolean(SettingsActivity.ALARM_ENABLED, true)
+        timeToStopAlarm = sharedPreferences.getString(SettingsActivity.ALARM_MAX_TIME_TO_PLAY, "60")?.toLong()!!
+
+        Log.d(TAG, "Alarm enabled: $alarmEnabled, Time to stop: $timeToStopAlarm")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -70,7 +74,7 @@ class AlarmService : Service() {
         startForeground(randomId.toInt(), createNotification(title, message))
         mediaPlayer.start()
 
-        Log.d(TAG, "Starting alarm service")
+        Log.d(TAG, "Starting alarm service, finishing in " + (timeToStopAlarm * 1000))
 
         // Start a timer to automatically stop the alarm after 10 seconds
         timer = object : CountDownTimer(timeToStopAlarm * 1000, 1000) {
