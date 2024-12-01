@@ -11,5 +11,11 @@ export const CONSTANTS = {
 
 export const ROUTES = {
     ROOT: '/',
-    LAB: CONSTANTS.API_PREFIX + '/lab',
+    NOTIFICATIONS: CONSTANTS.API_PREFIX + '/notifications',
+}
+
+export const NOTIFICATIONS_ROUTES = {
+    ROOT: '/',
+    NOTIFY: '/notify',
+    ALERT: '/alert',
 }

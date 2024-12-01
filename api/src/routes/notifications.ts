@@ -3,17 +3,19 @@ import express from 'express'
 import fs from 'fs'
 import path from 'path'
 
-import { handleJsonPost } from '../controllers'
+import * as NotificationsController from '../controllers/notifications'
 import firebaseAdmin from '../config/firebase'
 import { authenticateApiKey } from '../middleware/apiKeyMiddleware'
 import { NOTIFICATION_TYPE } from '../utils/enums'
+import { NOTIFICATIONS_ROUTES } from '../utils/constants'
 
 const router = express.Router()
+const TAG = '[NotificationsRouter]'
 
 router.use(authenticateApiKey)
 
 router.get('/', (req: Request, res: Response) => {
-    res.status(200).json({ message: 'Hello from Lab Router!' })
+    res.status(200).json({ message: 'Hello from Notifications Router!' })
 })
 
 router.get('/alert/:id', (req: Request, res: Response) => {
@@ -28,10 +30,10 @@ router.get('/alert/:id', (req: Request, res: Response) => {
                 data: {
                     title: 'Mushu Debug Alert',
                     body: 'The fish are dying...maybe? ',
-                    type: NOTIFICATION_TYPE.ALERT
+                    type: NOTIFICATION_TYPE.ALERT,
                 },
                 android: {
-                    priority: "high" as "high",
+                    priority: 'high' as 'high',
                 },
             }
             break
@@ -40,10 +42,10 @@ router.get('/alert/:id', (req: Request, res: Response) => {
                 data: {
                     title: 'Mushu Alert',
                     body: 'The fish are dying! You monster!',
-                    type: NOTIFICATION_TYPE.ALERT
+                    type: NOTIFICATION_TYPE.ALERT,
                 },
                 android: {
-                    priority: "high" as "high",
+                    priority: 'high' as 'high',
                 },
                 topic: 'allUsers',
             }
@@ -53,10 +55,10 @@ router.get('/alert/:id', (req: Request, res: Response) => {
                 data: {
                     title: 'Mushu Alert Default',
                     body: 'Default message',
-                    type: NOTIFICATION_TYPE.ALERT
+                    type: NOTIFICATION_TYPE.ALERT,
                 },
                 android: {
-                    priority: "high" as "high",
+                    priority: 'high' as 'high',
                 },
                 topic: 'allUsers',
             }
@@ -79,60 +81,9 @@ router.get('/alert/:id', (req: Request, res: Response) => {
         })
 })
 
-router.get('/notify/:id', (req: Request, res: Response) => {
-    const { id } = req.params
-    const idNumber: number = Number(id)
+router.post(NOTIFICATIONS_ROUTES.NOTIFY, NotificationsController.handleNotify)
 
-    let message
-    switch (idNumber) {
-        case 0:
-            message = {
-                data: {
-                    title: 'Mushu Debug Notification',
-                    body: 'The fish are dying...maybe? ',
-                    type: NOTIFICATION_TYPE.NOTIFIER
-                },
-                topic: 'debug',
-            }
-            break
-        case 1:
-            message = {
-                data: {
-                    title: 'Mushu Notification',
-                    body: 'The fish are dying! You monster!',
-                    type: NOTIFICATION_TYPE.NOTIFIER
-                },
-                topic: 'allUsers',
-            }
-            break
-        default:
-            message = {
-                data: {
-                    title: 'Mushu Notification Default',
-                    body: 'Default notifier message',
-                    type: NOTIFICATION_TYPE.NOTIFIER
-                },
-                topic: 'allUsers',
-            }
-            break
-    }
-
-    console.log('Sending notification: ', message.data.title)
-
-    // Send the message using the Admin SDK
-    firebaseAdmin
-        .messaging()
-        .send(message)
-        .then(response => {
-            console.log('Successfully sent message:', response)
-            res.status(200).send('Notification sent successfully')
-        })
-        .catch(error => {
-            console.log('Error sending message:', error)
-            res.status(500).send('Error sending notification')
-        })
-})
-
+router.post(NOTIFICATIONS_ROUTES.ALERT, NotificationsController.handleAlert)
 
 router.post('/', (req: Request, res: Response) => {
     console.log(req.body.coiso)

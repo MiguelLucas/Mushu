@@ -32,6 +32,8 @@
             app:key="alarm_max_time_to_play"
             app:title="@string/alarm_max_time_to_play"
             app:defaultValue="60"
+            android:inputType="numberDecimal"
+            android:digits="0123456789"
             app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>

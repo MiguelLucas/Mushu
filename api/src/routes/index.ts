@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express'
 
-import labRoutes from './lab'
+import notificationsRoutes from './notifications'
 import { ROUTES } from '../utils/constants'
 import { LandingController } from '../controllers/landing'
 
@@ -12,6 +12,6 @@ mainRouter.get(ROUTES.ROOT, (req: Request, res: Response) => {
 })
 
 // Use the web routes with the base path /web
-mainRouter.use(ROUTES.LAB, labRoutes)
+mainRouter.use(ROUTES.NOTIFICATIONS, notificationsRoutes)
 
 export default mainRouter

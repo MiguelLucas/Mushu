@@ -9,6 +9,7 @@ import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
+import androidx.preference.SwitchPreferenceCompat
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -27,6 +28,18 @@ class SettingsActivity : AppCompatActivity() {
     class SettingsFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
+
+            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+
+            findPreference<SwitchPreferenceCompat>(ALARM_ENABLED)?.setOnPreferenceChangeListener { _, newValue ->
+                sharedPreferences.edit().putBoolean(ALARM_ENABLED, newValue as Boolean).apply()
+                true
+            }
+
+            findPreference<EditTextPreference>(ALARM_MAX_TIME_TO_PLAY)?.setOnPreferenceChangeListener { _, newValue ->
+                sharedPreferences.edit().putString(ALARM_MAX_TIME_TO_PLAY, newValue as String).apply()
+                true
+            }
         }
     }
 
