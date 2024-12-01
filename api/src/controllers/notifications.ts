@@ -8,13 +8,19 @@ import { FirebaseMessageResult, FirebaseMessage } from '../types/firebase'
 
 const TAG = '[NotificationsController]'
 
-export const handleNotify = asyncHandler(async (req: Request, res: Response) => {
-    console.log(`${TAG} Handling notification request`)
-    const reqBody = req.body
-
+const validateNotificationRequest = (reqBody: any) => {
     if (isEmpty(reqBody)) {
         console.error(`${TAG} Request body not present/empty`)
+        return false
+    }
 
+    return true
+}
+
+const handleNotificationRequest = async (req: Request, res: Response, type: NOTIFICATION_TYPE) => {
+    const reqBody = req.body
+
+    if (!validateNotificationRequest(reqBody)) {
         res.status(400).json({
             message: `No request body!`,
         })
@@ -25,12 +31,12 @@ export const handleNotify = asyncHandler(async (req: Request, res: Response) => 
         data: {
             title: reqBody.title || 'Mushu Debug Notification',
             body: reqBody.body || 'Please ignore if you are getting this notification',
-            type: NOTIFICATION_TYPE.NOTIFIER,
+            type: type
         },
-        topic: 'debug',
+        topic: reqBody.topic || 'debug',
     }
 
-    console.log(`${TAG} Sending notification: ${message.data.title}`)
+    console.log(`${TAG} Sending ${type}: ${message.data.title}`)
     let firebaseRes: FirebaseMessageResult = await sendFirebaseMessage(message)
 
     if (firebaseRes.success){
@@ -38,10 +44,15 @@ export const handleNotify = asyncHandler(async (req: Request, res: Response) => 
     } else {
         res.status(500).send(firebaseRes.error)
     }
+}
+
+
+export const handleNotify = asyncHandler(async (req: Request, res: Response) => {
+    console.log(`${TAG} Handling notification request`)
+    handleNotificationRequest(req, res, NOTIFICATION_TYPE.NOTIFIER)
 })
 
 export const handleAlert = asyncHandler(async (req: Request, res: Response) => {
     console.log(`${TAG} Handling alert request`)
-
-    res.send('NOT IMPLEMENTED: Handle alert')
+    handleNotificationRequest(req, res, NOTIFICATION_TYPE.ALERT)
 })
