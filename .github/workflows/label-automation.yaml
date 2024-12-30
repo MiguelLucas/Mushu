@@ -1,8 +1,8 @@
-name: Ensure Issue Has a Label and Auto-Assign Label
+name: Ensure Issue Has a Label and Auto-Assign Label (Python)
 
 on:
   issues:
-    types: [opened]
+    types: [opened, edited]  # Trigger when an issue is opened or edited
 
 jobs:
   label_issues:
@@ -11,36 +11,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Get the next issue label
-        id: next_label
-        run: |
-          # Set the prefix based on your label type
-          LABEL_PREFIX="BUG"
-          
-          # Get the latest number for this type of label (BUG-001, BUG-002, etc.)
-          NEXT_ID=$(gh api repos/{owner}/{repo}/issues --jq '.[] | select(.labels[] | contains("'"$LABEL_PREFIX"'-)) | .labels[]' | grep -Eo '"$LABEL_PREFIX"-[0-9]+' | sed 's/[^0-9]*//g' | sort -n | tail -n 1)
-          
-          # Increment the latest ID and create the next label
-          NEXT_ID=$((NEXT_ID+1))
-          echo "Next issue ID: $LABEL_PREFIX-$NEXT_ID"
-          
-          # Output the next label
-          echo "::set-output name=next_id::BUG-${NEXT_ID}"
+      - name: Set up Python (latest version)
+        uses: actions/setup-python@v2
+        with:
+          python-version: 'latest'  # Automatically uses the latest stable version of Python
 
-      - name: Check if the issue has labels
-        id: check_labels
+      - name: Install required packages
         run: |
-          if [[ -z "${{ github.event.issue.labels }}" ]]; then
-            echo "No labels found. Adding a label."
-            echo "::set-output name=add_label::true"
-          else
-            echo "Issue already has labels."
-            echo "::set-output name=add_label::false"
-          fi
+          python -m pip install --upgrade pip
+          pip install requests
 
-      - name: Add label to issue if none exists
-        if: steps.check_labels.outputs.add_label == 'true'
+      - name: Run Python script to handle labels
         run: |
-          # Get the next label from the previous step
-          NEW_LABEL="${{ steps.next_label.outputs.next_id }}"
-   
+          python scripts/label_issues.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
