@@ -69,18 +69,15 @@ def main():
     with open(issue_labels) as f:
         event_data = json.load(f)
 
-    # Extract the first label type from the issue (we will use it to determine the prefix)
+    # Extract the first label type from the issue or use "bug" as default
+    label_name = "bug"  # Default label
     if event_data.get("labels"):
-        label_name = event_data["labels"][0]["name"].lower()
-        if label_name in LABEL_PREFIXES:
-            label_prefix = LABEL_PREFIXES[label_name]
-        else:
-            print(f"Unknown label type: {label_name}, skipping label assignment.")
-            return
-    else:
-        print("No labels found in issue, skipping label assignment.")
-        return
+        first_label = event_data["labels"][0]["name"].lower()
+        if first_label in LABEL_PREFIXES:
+            label_name = first_label
 
+    label_prefix = LABEL_PREFIXES[label_name]
+    
     # Get the next label for this prefix
     next_label = get_next_label(repo_owner, repo_name, label_prefix)
 
