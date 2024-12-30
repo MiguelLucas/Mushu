@@ -1,14 +1,19 @@
 package com.mlucas.mushu
 
 import android.Manifest.permission.POST_NOTIFICATIONS
+import android.app.AlarmManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
@@ -50,8 +55,45 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+
+        askAlarmPermission()
         askNotificationPermission()
         configureNotifications()
+    }
+
+    private fun askAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+            if (!alarmManager.canScheduleExactAlarms()) {
+                showPermissionExplanationDialog()
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun showPermissionExplanationDialog() {
+        firebaseAnalytics.logEvent("AlarmPermission", Bundle().apply {
+            putBoolean("alarmPermissionAsked", true)
+        })
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(R.string.dialog_alarm_permission_title)
+            .setMessage(R.string.dialog_alarm_permission_body)
+            .setPositiveButton(R.string.dialog_alarm_permission_positive_btn) { dialog, _ ->
+                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                startActivity(intent)
+                dialog.dismiss()
+                firebaseAnalytics.logEvent("AlarmPermission", Bundle().apply {
+                    putBoolean("alarmPermissionGranted", true)
+                })
+            }
+            .setNegativeButton(R.string.dialog_alarm_permission_negative_btn) { dialog, _ ->
+                dialog.dismiss()
+                firebaseAnalytics.logEvent("AlarmPermission", Bundle().apply {
+                    putBoolean("alarmPermissionGranted", false)
+                })
+            }
+            .show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

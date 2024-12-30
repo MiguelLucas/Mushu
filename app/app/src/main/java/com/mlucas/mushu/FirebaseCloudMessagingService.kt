@@ -1,15 +1,17 @@
 package com.mlucas.mushu
 
+import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import androidx.preference.PreferenceManager
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import androidx.work.Worker
@@ -53,8 +55,10 @@ class FirebaseCloudMessagingService : FirebaseMessagingService() {
             // Check if data needs to be processed by long running job
             // For long-running tasks (10 seconds or more) use WorkManager (see scheduleJob())
             // For short lived tasks, execute them immediately
+            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+            val alarmEnabled = sharedPreferences.getBoolean(SettingsActivity.ALARM_ENABLED, true)
 
-            if (notificationType == NotificationType.ALARM) {
+            if (notificationType == NotificationType.ALARM && alarmEnabled) {
                 sendAlarm(notification)
             } else {
                 sendNotification(notification)
@@ -137,25 +141,37 @@ class FirebaseCloudMessagingService : FirebaseMessagingService() {
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         // Since android Oreo notification channel is needed.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "General notification channel",
-                NotificationManager.IMPORTANCE_HIGH
-            )
-            notificationManager.createNotificationChannel(channel)
-        }
+        val channel = NotificationChannel(
+            channelId,
+            "General notification channel",
+            NotificationManager.IMPORTANCE_HIGH
+        )
+        notificationManager.createNotificationChannel(channel)
 
         notificationManager.notify(0,  /* ID of notification */notificationBuilder.build())
     }
 
+
     private fun sendAlarm(notification: NotificationEntity) {
-        val intent = Intent(this, AlarmService::class.java).apply {
-            action = "START_ALARM"
+        val alarmIntent = Intent(this, AlarmReceiver::class.java).apply {
             putExtra("title", notification.title)
             putExtra("message", notification.message)
         }
-        startForegroundService(intent)
+        val pendingIntent = PendingIntent.getBroadcast(
+            this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val triggerTime = System.currentTimeMillis() + 500 // Trigger in 0.5 seconds
+        if (alarmManager.canScheduleExactAlarms()) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerTime,
+                pendingIntent
+            )
+        } else {
+            Toast.makeText(this.applicationContext, "No permission to trigger alarm", Toast.LENGTH_LONG).show()
+        }
     }
 
     class MyWorker(context: Context, workerParams: WorkerParameters) :
