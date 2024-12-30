@@ -1,4 +1,4 @@
-name: Ensure Issue Has a Label and Auto-Assign Label
+name: Auto-Assign Label
 
 on:
   issues:
@@ -8,24 +8,28 @@ permissions:
   contents: read
   issues: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
 jobs:
-  label_issues:
+  prefix_issues:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Python (latest version)
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.13.1'
-
-      - name: Install required packages
+          cache: 'pip'
+      
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install requests
-
-      - name: Run Python script to handle labels
-        run: python scripts/label_issues.py
+        
+      - name: Update Issue Title
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/label_issues.py
