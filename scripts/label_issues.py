@@ -68,7 +68,14 @@ def update_issue_title(repo_owner, repo_name, issue_number, new_title):
 def strip_existing_prefix(title):
     """Remove existing prefix if present and return the clean title"""
     if ':' in title:
+        # Get everything after the first colon and strip any existing prefixes
         clean_title = title.split(':', 1)[1].strip()
+        
+        # Remove any prefix patterns from the clean title
+        for prefix in LABEL_PREFIXES.values():
+            if clean_title.startswith(f"{prefix}-"):
+                clean_title = clean_title.split('-', 1)[1].strip()
+        
         return clean_title
     return title
 
@@ -106,8 +113,9 @@ def reorder_issues(repo_owner, repo_name, prefix_to_update):
     # Update all issues with new sequential numbers
     for i, issue in enumerate(prefix_issues, 1):
         new_title = f"{prefix_to_update}-{i:03d}: {issue['title']}"
-        update_issue_title(repo_owner, repo_name, issue["number"], new_title)
-        print(f"Reordered issue #{issue['number']} to: {new_title}")
+        if new_title != issue.get("title"):  # Only update if title would change
+            update_issue_title(repo_owner, repo_name, issue["number"], new_title)
+            print(f"Reordered issue #{issue['number']} to: {new_title}")
 
 def main():
     # Read the event data
@@ -132,15 +140,20 @@ def main():
     # Get the old prefix if it exists
     old_prefix = None
     if ':' in current_title:
-        old_prefix = current_title.split('-')[0]
+        try:
+            old_prefix = current_title.split('-')[0]
+        except IndexError:
+            old_prefix = None
     
     # Clean the title
     clean_title = strip_existing_prefix(current_title)
     
-    # Reorder issues for both old and new prefixes if they're different
+    # Always reorder issues for the current prefix type
+    reorder_issues(repo_owner, repo_name, new_prefix)
+    
+    # If prefix changed, also reorder old prefix type
     if old_prefix and old_prefix != new_prefix:
         reorder_issues(repo_owner, repo_name, old_prefix)
-    reorder_issues(repo_owner, repo_name, new_prefix)
     
     print(f"Completed reordering for issue #{issue_number}")
 
