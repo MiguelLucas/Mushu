@@ -2,7 +2,7 @@ name: Ensure Issue Has a Label and Auto-Assign Label (Python)
 
 on:
   issues:
-    types: [opened, edited]  # Trigger when an issue is opened or edited
+    types: [opened, edited]
 
 jobs:
   label_issues:
@@ -14,7 +14,7 @@ jobs:
       - name: Set up Python (latest version)
         uses: actions/setup-python@v2
         with:
-          python-version: 'latest'  # Automatically uses the latest stable version of Python
+          python-version: '3.13.1'
 
       - name: Install required packages
         run: |
