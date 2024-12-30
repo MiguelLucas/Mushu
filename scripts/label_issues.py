@@ -103,4 +103,14 @@ def main():
         old_prefix = existing_numbered_label.split('-')[0]
         if old_prefix != prefix:
             remove_label(repo_owner, repo_name, issue_number, existing_numbered_label)
-            next_label = get_next_label
+            next_label = get_next_label(repo_owner, repo_name, prefix)
+            add_label_to_issue(repo_owner, repo_name, issue_number, next_label)
+            print(f"Changed label from {existing_numbered_label} to {next_label} for issue #{issue_number}")
+    else:
+        # No existing numbered label, add new one
+        next_label = get_next_label(repo_owner, repo_name, prefix)
+        add_label_to_issue(repo_owner, repo_name, issue_number, next_label)
+        print(f"Added label {next_label} to issue #{issue_number}")
+
+if __name__ == "__main__":
+    main()
