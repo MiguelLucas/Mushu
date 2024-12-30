@@ -12,80 +12,95 @@ LABEL_PREFIXES = {
     "duplicate": "DUP",
 }
 
+def get_existing_numbered_label(labels):
+    """Check if the issue already has a numbered label"""
+    for label in labels:
+        name = label["name"]
+        for prefix in LABEL_PREFIXES.values():
+            if name.startswith(prefix + "-"):
+                return name
+    return None
+
+def remove_label(repo_owner, repo_name, issue_number, label):
+    """Remove a label from an issue"""
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{issue_number}/labels/{label}"
+    headers = {
+        "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN')}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+    
+    response = requests.delete(url, headers=headers)
+    if response.status_code not in [200, 404]:  # 404 means label was already removed
+        raise Exception(f"Failed to remove label: {response.status_code}")
+
 def get_next_label(repo_owner, repo_name, label_prefix):
-    # GitHub API URL to fetch issues
+    """Get the next available number for a label prefix"""
     url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues"
     headers = {
-        "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN')}"
+        "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN')}",
+        "Accept": "application/vnd.github.v3+json"
     }
-
-    # Get all issues to check for the latest label number
-    response = requests.get(url, headers=headers)
+    
+    # Get all issues with their labels
+    response = requests.get(url, headers=headers, params={"state": "all", "per_page": 100})
     if response.status_code != 200:
         raise Exception(f"Failed to fetch issues: {response.status_code}")
 
     issues = response.json()
-
-    # Extract labels and find the latest label number for the given prefix
-    existing_labels = []
+    
+    # Find the highest number for this prefix
+    max_number = 0
     for issue in issues:
         for label in issue.get("labels", []):
             if label["name"].startswith(label_prefix):
-                existing_labels.append(label["name"])
+                try:
+                    number = int(label["name"].split('-')[1])
+                    max_number = max(max_number, number)
+                except (IndexError, ValueError):
+                    continue
+    
+    # Generate next label
+    return f"{label_prefix}-{(max_number + 1):03d}"
 
-    # Get the highest label number and increment it
-    existing_labels = sorted(existing_labels, key=lambda x: int(x.split('-')[1]) if x.split('-')[0] == label_prefix else 0)
-    latest_label = existing_labels[-1] if existing_labels else f"{label_prefix}-000"
-    latest_number = int(latest_label.split('-')[1])
-    next_number = latest_number + 1
-    next_label = f"{label_prefix}-{next_number:03d}"
-
-    return next_label
-
-def add_label_to_issue(repo_owner, repo_name, issue_number, next_label):
+def add_label_to_issue(repo_owner, repo_name, issue_number, label):
+    """Add a label to an issue"""
     url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{issue_number}/labels"
     headers = {
         "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN')}",
-        "Content-Type": "application/json"
+        "Accept": "application/vnd.github.v3+json"
     }
-    payload = {
-        "labels": [next_label]
-    }
-
-    # Add the label to the issue
-    response = requests.post(url, json=payload, headers=headers)
-    if response.status_code == 200:
-        print(f"Successfully added label {next_label} to issue #{issue_number}")
-    else:
-        print(f"Failed to add label: {response.status_code}, {response.text}")
+    
+    response = requests.post(url, json={"labels": [label]}, headers=headers)
+    if response.status_code != 200:
+        raise Exception(f"Failed to add label: {response.status_code}")
 
 def main():
-    # Get repository details and issue number from environment variables
+    # Read the event data
+    with open(os.getenv('GITHUB_EVENT_PATH')) as f:
+        event = json.load(f)
+    
+    # Get repository information
     repo_owner, repo_name = os.getenv('GITHUB_REPOSITORY').split('/')
-    issue_number = os.getenv('GITHUB_REF').split('/')[-1]
-
-    # Get the issue labels from the event payload
-    issue_labels = os.getenv("GITHUB_EVENT_PATH")
-    with open(issue_labels) as f:
-        event_data = json.load(f)
-
-    # Extract the first label type from the issue (we will use it to determine the prefix)
-    if event_data.get("labels"):
-        label_name = event_data["labels"][0]["name"].lower()
+    issue_number = event['issue']['number']
+    current_labels = event['issue']['labels']
+    
+    # Check for existing numbered label
+    existing_numbered_label = get_existing_numbered_label(current_labels)
+    
+    # Determine the issue type from existing labels
+    issue_type = "bug"  # default type
+    for label in current_labels:
+        label_name = label['name'].lower()
         if label_name in LABEL_PREFIXES:
-            label_prefix = LABEL_PREFIXES[label_name]
-        else:
-            print(f"Unknown label type: {label_name}, skipping label assignment.")
-            return
-    else:
-        print("No labels found in issue, skipping label assignment.")
-        return
-
-    # Get the next label for this prefix
-    next_label = get_next_label(repo_owner, repo_name, label_prefix)
-
-    # Add the label to the issue
-    add_label_to_issue(repo_owner, repo_name, issue_number, next_label)
-
-if __name__ == "__main__":
-    main()
+            issue_type = label_name
+            break
+    
+    # Get the prefix for this type
+    prefix = LABEL_PREFIXES[issue_type]
+    
+    # If the issue type has changed, remove old numbered label and add new one
+    if existing_numbered_label:
+        old_prefix = existing_numbered_label.split('-')[0]
+        if old_prefix != prefix:
+            remove_label(repo_owner, repo_name, issue_number, existing_numbered_label)
+            next_label = get_next_label
