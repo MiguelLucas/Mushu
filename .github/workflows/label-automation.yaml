@@ -2,7 +2,7 @@ name: Ensure Issue Has a Label and Auto-Assign Label (Python)
 
 on:
   issues:
-    types: [opened, edited]
+    types: [opened, labeled, edited]
 
 jobs:
   label_issues:
