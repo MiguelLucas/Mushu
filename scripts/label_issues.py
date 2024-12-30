@@ -132,9 +132,13 @@ def reorder_issues(repo_owner, repo_name, prefix_to_update):
             prefix_issues.append({
                 "number": issue["number"],
                 "title": clean_title,
-                "current_title": title
+                "current_title": title,
+                "created_at": issue["created_at"]
             })
             logging.debug(f"Including issue #{issue['number']} in reordering")
+    
+    # Sort issues by creation date (oldest first)
+    prefix_issues.sort(key=lambda x: x["created_at"])
     
     logging.info(f"Found {len(prefix_issues)} issues to reorder for prefix {prefix_to_update}")
     
