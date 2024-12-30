@@ -13,18 +13,33 @@ LABEL_PREFIXES = {
 }
 
 def get_all_issues(repo_owner, repo_name):
-    """Get all issues from the repository"""
+    """Get all issues from the repository with pagination"""
     url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues"
     headers = {
         "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN')}",
         "Accept": "application/vnd.github.v3+json"
     }
     
-    response = requests.get(url, headers=headers, params={"state": "all", "per_page": 100})
-    if response.status_code != 200:
-        raise Exception(f"Failed to fetch issues: {response.status_code}")
+    all_issues = []
+    page = 1
     
-    return response.json()
+    while True:
+        response = requests.get(
+            url, 
+            headers=headers, 
+            params={"state": "all", "per_page": 100, "page": page}
+        )
+        if response.status_code != 200:
+            raise Exception(f"Failed to fetch issues: {response.status_code}")
+        
+        issues = response.json()
+        if not issues:
+            break
+            
+        all_issues.extend(issues)
+        page += 1
+    
+    return all_issues
 
 def add_label_to_issue(repo_owner, repo_name, issue_number, label):
     """Add a label to an issue"""
