@@ -43,6 +43,9 @@ class FirebaseCloudMessagingService : FirebaseMessagingService() {
             putString("receivedNotificationMsg", remoteMessage.data["body"])
         })
 
+        Log.d(TAG, remoteMessage.priority.toString())
+        Log.d(TAG, remoteMessage.originalPriority.toString())
+
         val notificationType = NotificationType.fromString(remoteMessage.data["type"])
         val notification = NotificationEntity(title = remoteMessage.data["title"]!!, message = remoteMessage.data["body"]!!, timestamp = System.currentTimeMillis(), type = notificationType)
         this.addNotificationToDatabase(notification)

@@ -5,8 +5,10 @@ import android.app.AlarmManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import android.view.Menu
@@ -58,6 +60,7 @@ class MainActivity : AppCompatActivity() {
 
         askAlarmPermission()
         askNotificationPermission()
+        requestBatteryOptimizationExemption()
         configureNotifications()
     }
 
@@ -155,6 +158,68 @@ class MainActivity : AppCompatActivity() {
                     putBoolean("askingNotificationPermission", true)
                 })
                 requestPermissionLauncher.launch(POST_NOTIFICATIONS)
+            }
+        }
+    }
+
+    private fun requestBatteryOptimizationExemption() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            val packageName = packageName
+
+            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
+                Log.d(TAG, "Battery optimization not ignored. Device: ${Build.MANUFACTURER} ${Build.MODEL}")
+
+                firebaseAnalytics.logEvent("battery_optimization_not_ignored", Bundle().apply {
+                    putString("device_manufacturer", Build.MANUFACTURER)
+                    putString("device_model", Build.MODEL)
+                    putInt("android_version", Build.VERSION.SDK_INT)
+                })
+
+                // Show dialog explaining why this is needed, especially for Pixel devices
+                val builder = AlertDialog.Builder(this)
+                builder.setTitle("Battery Optimization")
+                    .setMessage("To ensure alarms work reliably on your ${Build.MANUFACTURER} ${Build.MODEL}, please disable battery optimization for this app.")
+                    .setPositiveButton("Open Settings") { dialog, _ ->
+                        try {
+                            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                                data = Uri.parse("package:$packageName")
+                            }
+                            startActivity(intent)
+                            Log.d(TAG, "Battery optimization exemption requested")
+
+                            firebaseAnalytics.logEvent("battery_optimization_requested", Bundle().apply {
+                                putString("device_model", Build.MODEL)
+                                putBoolean("user_accepted", true)
+                            })
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error requesting battery optimization exemption", e)
+
+                            firebaseAnalytics.logEvent("battery_optimization_error", Bundle().apply {
+                                putString("error_message", e.message ?: "unknown")
+                                putString("device_model", Build.MODEL)
+                            })
+                        }
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton("Skip") { dialog, _ ->
+                        Log.d(TAG, "User skipped battery optimization exemption")
+
+                        firebaseAnalytics.logEvent("battery_optimization_requested", Bundle().apply {
+                            putString("device_model", Build.MODEL)
+                            putBoolean("user_accepted", false)
+                        })
+
+                        dialog.dismiss()
+                    }
+                    .show()
+            } else {
+                Log.d(TAG, "Battery optimization already ignored")
+
+                firebaseAnalytics.logEvent("battery_optimization_already_ignored", Bundle().apply {
+                    putString("device_manufacturer", Build.MANUFACTURER)
+                    putString("device_model", Build.MODEL)
+                })
             }
         }
     }
