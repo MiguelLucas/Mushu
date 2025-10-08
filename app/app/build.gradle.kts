@@ -20,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "com.mlucas.mushu"
-        minSdk = 26
+        minSdk = 31
         targetSdk = 34
         versionCode = 1
         versionName = appVersion
@@ -65,14 +65,13 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
-    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.preference.ktx)
     implementation(libs.androidx.preference)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
 
     // Import the Firebase BoM
     implementation(platform(libs.firebase.bom))

@@ -29,4 +29,10 @@
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
 
+    <!-- Permissions -->
+    <string name="dialog_alarm_permission_title">Alarm Permission Needed</string>
+    <string name="dialog_alarm_permission_body">In order to schedule alarms accurately, we need your permission to use exact alarms. Please search for the Mushu app in your settings and grant this permission.</string>
+    <string name="dialog_alarm_permission_positive_btn">Go to Settings</string>
+    <string name="dialog_alarm_permission_negative_btn">Cancel</string>
+
 </resources>
